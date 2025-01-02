@@ -1,0 +1,14 @@
+[project]
+name = "tdd-w-python"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "django>=5.1.4",
+]
+
+[dependency-groups]
+dev = [
+    "selenium>=4.27.1",
+]
