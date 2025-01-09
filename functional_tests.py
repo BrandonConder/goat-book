@@ -1,7 +1,27 @@
+import unittest
 from selenium import webdriver
 
-browser = webdriver.Firefox()
-browser.get('http://localhost:8000')
+class NewVisitorTest(unittest.TestCase):
+    def setUp(self):
+        self.browser = webdriver.Firefox()
 
-assert 'Congratulations!' in browser.title
-print('OK')
+    def tearDown(self):
+        self.browser.quit()
+
+    def test_can_start_a_todo_list(self):
+        # Let's check on our to-do list
+        self.browser.get('http://localhost:8000')
+
+        # The header tells us we're in the to-do application
+        self.assertIn('To-Do', self.browser.title)
+
+        # Enter a to-do item
+        # 1. Buy peacock feathers
+
+        # Text box must allo another entry
+        # Enter "Use peacock feathers ot make a fly
+
+        # Page update, with both items
+
+if __name__ == '__main__':
+    unittest.main()
