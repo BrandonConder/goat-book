@@ -19,7 +19,7 @@ class NewVisitorTest(unittest.TestCase):
         # 1. Buy peacock feathers
 
         # Text box must allo another entry
-        # Enter "Use peacock feathers ot make a fly
+        # Enter "Use peacock feathers to make a fly
 
         # Page update, with both items
 
