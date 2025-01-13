@@ -23,5 +23,7 @@ class NewVisitorTest(unittest.TestCase):
 
         # Page update, with both items
 
+        self.fail('Finish the test!')
+
 if __name__ == '__main__':
     unittest.main()
