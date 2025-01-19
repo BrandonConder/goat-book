@@ -3,6 +3,8 @@ from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 import time
 
 MAX_WAIT = 15  # 15 seconds is too long for a client to wait for a page to load
@@ -16,18 +18,12 @@ class NewVisitorTest(LiveServerTestCase):
         self.browser.quit()
 
     def wait_for_row_in_list_table(self, row_text):
-        start_time = time.time()
-        # Avoid infinite loop
-        for _ in range(int(MAX_WAIT // POLLING_RATE) + 1):
-            try:
-                table = self.browser.find_element(By.ID, 'id_list_table')
-                rows = table.find_elements(By.TAG_NAME, 'tr')
-                self.assertIn(row_text, [row.text for row in rows])
-                return
-            except (AssertionError, WebDriverException) as err:
-                if time.time() - start_time > MAX_WAIT:
-                    raise err
-                time.sleep(POLLING_RATE)
+        exceptions = [WebDriverException]  # I've left off AssertionError as it wouldn't apply here. Is this a mistake?
+        table = WebDriverWait(self.browser, MAX_WAIT, POLLING_RATE, exceptions).until(
+            EC.presence_of_element_located((By.ID, 'id_list_table'))
+        )
+        rows = table.find_elements(By.TAG_NAME, 'tr')
+        self.assertIn(row_text, [row.text for row in rows])        
 
     def test_can_start_a_todo_list(self):
         # Let's check on our to-do list
