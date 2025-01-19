@@ -8,7 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 import time
 
 MAX_WAIT = 15  # 15 seconds is too long for a client to wait for a page to load
-POLLING_RATE = 0.5  # Check webpage no more often than every 0.5 seconds
+POLLING_RATE = 0.1  # Check webpage no more often than every 0.1 seconds
 
 class NewVisitorTest(LiveServerTestCase):
     def setUp(self):
@@ -17,8 +17,18 @@ class NewVisitorTest(LiveServerTestCase):
     def tearDown(self):
         self.browser.quit()
 
+    def send_keys_and_wait_for_refresh(self, element, keys):
+        element.send_keys(keys)
+        self.wait_for_page_refresh(element)
+
+    def wait_for_page_refresh(self, element_going_stale):
+        exceptions = [WebDriverException]
+        WebDriverWait(self.browser, MAX_WAIT, POLLING_RATE, exceptions).until(
+            EC.staleness_of(element_going_stale)
+        )
+
     def wait_for_row_in_list_table(self, row_text):
-        exceptions = [WebDriverException]  # I've left off AssertionError as it wouldn't apply here. Is this a mistake?
+        exceptions = [WebDriverException]
         table = WebDriverWait(self.browser, MAX_WAIT, POLLING_RATE, exceptions).until(
             EC.presence_of_element_located((By.ID, 'id_list_table'))
         )
@@ -40,8 +50,7 @@ class NewVisitorTest(LiveServerTestCase):
 
         # 1. Buy peacock feathers
         inputbox.send_keys('Buy peacock feathers')
-        inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
+        self.send_keys_and_wait_for_refresh(inputbox, Keys.ENTER)
         self.wait_for_row_in_list_table('1: Buy peacock feathers')
 
         # Text box must allow another entry
@@ -49,8 +58,7 @@ class NewVisitorTest(LiveServerTestCase):
         # Enter "Use peacock feathers to make a fly
         inputbox = self.browser.find_element(By.ID, 'id_new_item')
         inputbox.send_keys('Use peacock feathers to make a fly')
-        inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
+        self.send_keys_and_wait_for_refresh(inputbox, Keys.ENTER)
 
         # Page update, with both items
         self.wait_for_row_in_list_table('1: Buy peacock feathers')
