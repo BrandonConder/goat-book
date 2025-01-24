@@ -84,11 +84,11 @@ class NewVisitorTest(LiveServerTestCase):
         # User B starts a new list
         self.browser.get(self.live_server_url)
         page_text = self.browser.find_element(By.TAG_NAME, 'body').text
-        self.assertNotIN('Buy peacock feathers', page_text)
+        self.assertNotIn('Buy peacock feathers', page_text)
         self.assertNotIn('make a fly', page_text)
 
         # Enter a new item
-        inputnboc = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
         inputbox.send_keys('Buy milk')
         self.send_keys_and_wait_for_refresh(inputbox, Keys.ENTER)
         self.wait_for_row_in_list_table('1: Buy milk')
