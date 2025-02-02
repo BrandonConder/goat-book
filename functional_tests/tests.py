@@ -65,3 +65,42 @@ class NewVisitorTest(LiveServerTestCase):
         self.wait_for_row_in_list_table('2: Use peacock feathers to make a fly')
 
         # Test complete
+
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        # User A starts a to-do list
+        self.browser.get(self.live_server_url)
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox.send_keys('Buy peacock feathers')
+        self.send_keys_and_wait_for_refresh(inputbox, Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy peacock feathers')
+
+        # The list has a unique URL
+        list_url_a = self.browser.current_url
+        self.assertRegex(list_url_a, '/lists/.+')
+
+        # Clean state
+        self.browser.delete_all_cookies()
+        
+        # User B starts a new list
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element(By.TAG_NAME, 'body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertNotIn('make a fly', page_text)
+
+        # Enter a new item
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox.send_keys('Buy milk')
+        self.send_keys_and_wait_for_refresh(inputbox, Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy milk')
+
+        # Hey look! A new URL!
+        list_url_b = self.browser.current_url
+        self.assertRegex(list_url_a, '/lists/.+')
+        self.assertNotEqual(list_url_a, list_url_b)
+
+        # Check again
+        page_text = self.browser.find_element(By.TAG_NAME, 'body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertIn('Buy milk', page_text)
+
+        # Test complete
