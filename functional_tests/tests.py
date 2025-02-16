@@ -1,4 +1,5 @@
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+import os
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
@@ -13,6 +14,9 @@ POLLING_RATE = 0.1  # Check webpage no more often than every 0.1 seconds
 class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
+        test_server = os.environ.get('TEST_SERVER')
+        if test_server:
+            self.live_server_url = f'http://{test_server}'
 
     def tearDown(self):
         self.browser.quit()
