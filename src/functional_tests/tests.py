@@ -1,4 +1,5 @@
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+import os
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.by import By
@@ -10,9 +11,12 @@ import time
 MAX_WAIT = 15  # 15 seconds is too long for a client to wait for a page to load
 POLLING_RATE = 0.1  # Check webpage no more often than every 0.1 seconds
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         self.browser = webdriver.Firefox()
+        test_server = os.environ.get('TEST_SERVER')
+        if test_server:
+            self.live_server_url = f'http://{test_server}'
 
     def tearDown(self):
         self.browser.quit()
@@ -104,3 +108,29 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertIn('Buy milk', page_text)
 
         # Test complete
+
+    def test_layout_and_styling(self):
+        self.browser.get(self.live_server_url)
+        # In this example, the browser window is a fixed size
+        width = 1024
+        height = 768
+        self.browser.set_window_size(width, height)
+
+        # Check that the input box is centered
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width'] / 2,
+            width / 2,
+            delta=10
+        )
+
+        # Start a new list and check if centered
+        inputbox.send_keys('testing')
+        self.send_keys_and_wait_for_refresh(inputbox, Keys.ENTER)
+        self.wait_for_row_in_list_table('1: testing')
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width'] / 2,
+            width / 2,
+            delta=10
+        )
